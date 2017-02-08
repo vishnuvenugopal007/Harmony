@@ -1,35 +1,41 @@
 const express = require('express')
 const app = express()
+const knex = require('knex')
 const PORT = 3005
-const playlist = {
-  name: 'Monday Morning Vibes',
-  id : 1,
-}
-
-
-//User can create a playlist
-
-app.get('/newPlaylist', (req, res) => {
-  res.send( {
-    name: playlist.name,
-    id: playlist.id
-  })
+const bodyParser = require('body-parser')
+const jsonParser = bodyParser.json()
+const connect = knex({
+  client: 'pg',
+  connection: {
+    host: '127.0.0.1',
+    user: 'vishnu',
+    database: 'sample',
+  }
 })
 
 app.listen(PORT)
 
 console.log(`Listening on ${PORT} - I can hear you!`)
 
-app.post('/newPlaylist', (req, res) => {
-  res.send({
-    name: 'playlist.name',
-    id: playlist.id,
-    song : {
-        artist: 'Childish Gambino',
-        song: 'Me and Your Mama',
-        album: 'Awaken, My Love!',
-        length: '6:19',
-      }
+//User can create an empty playlist
 
-  })
+app.get('/playlists/:id', (req, res) => {
+  const query = connect('playlists')
+    .where(req.params)
+  query
+    .then((playlists) => res.json(playlists[0]))
+})
+
+
+
+
+
+//User can create a playlist with a single song
+app.use(jsonParser)
+app.post('/playlists', (req, res) => {
+  const query = connect('playlists')
+    .insert(req.body)
+    .returning([ 'id', 'name'])
+  query
+    .then((playlists) => res.json(playlists[0]))
 })
