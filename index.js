@@ -13,6 +13,7 @@ const connect = knex({
   }
 })
 
+app.use(express.static('public'))
 app.listen(PORT)
 
 console.log(`Listening on ${PORT} - I can hear you!`)
